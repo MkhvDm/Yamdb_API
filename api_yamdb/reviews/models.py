@@ -6,6 +6,50 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 User = get_user_model()
 
 
+class Category(models.Model):
+    """Модель категории произведения."""
+    name = models.TextField()
+    slug = models.SlugField(unique=True)
+
+
+class Genre(models.Model):
+    """Модель жанра произведения."""
+    name = models.TextField()
+    slug = models.SlugField(unique=True)
+
+
+class Title(models.Model):
+    """Модель произведения."""
+    name = models.TextField()
+    year = models.IntegerField()
+    description = models.CharField(
+        max_length=250,
+        blank=True, null=True
+    )
+    category = models.ForeignKey(
+        Category, blank=True, null=True,
+        on_delete=models.SET_NULL,
+        related_name='titles'
+    )
+    genre = models.ManyToManyField(
+        Genre, blank=True,
+        through='TitleGenre',
+        related_name='titles'
+    )
+
+
+class TitleGenre(models.Model):
+    """Модель для связи между произведениями и их жанрами."""
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE
+    )
+
+
 class Review(models.Model):
     """Модель рецензии на произведение."""
     title = models.ForeignKey(
