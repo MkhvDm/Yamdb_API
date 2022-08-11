@@ -34,7 +34,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if models.Title.objects.exists():
-            print('Data already loaded...exiting.')
             print(ALREADY_LOADED_ERROR_MESSAGE)
             return
 
