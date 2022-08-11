@@ -9,6 +9,6 @@ user@machine .api_yamdb/api_yamdb/
 ```
 Затем выполнить команду:
 ```
-python manage.py load_db
+> python manage.py load_db
 ```
 
