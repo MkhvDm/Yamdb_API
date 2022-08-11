@@ -23,11 +23,21 @@ fk_names = {
     'users': ('author', 'users', 'author_id', 'user_id', ),
 }
 
+ALREADY_LOADED_ERROR_MESSAGE = (
+    'Кажется, в базе уже есть данные. Попробуйте удалить файл db, выполнить '
+    'миграции и запустить команду заново.'
+)
+
 
 class Command(BaseCommand):
     help = 'Load data in database (SQLite3) from CSV-file.'
 
     def handle(self, *args, **options):
+        if models.Title.objects.exists():
+            print('Data already loaded...exiting.')
+            print(ALREADY_LOADED_ERROR_MESSAGE)
+            return
+
         table_names = list(models_assignments.keys())
         for table in table_names:
             csv_file = f'static/data/{table}.csv'
