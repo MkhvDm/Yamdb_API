@@ -25,5 +25,10 @@ class User(AbstractUser):
         blank=True,
     )
 
+    confirmation_code = models.CharField(
+        'confirmation_code',
+        max_length=6,
+        null=True)
+
     def __str__(self):
         return self.username
