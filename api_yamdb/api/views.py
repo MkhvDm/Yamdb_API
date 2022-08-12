@@ -27,7 +27,7 @@ class SignUpViewSet(CreateUserViewSet):
         return random.randrange(111111, 999999, 6)
 
     def send_confirmation_code_to_mail(self, email, confirmation_code):
-        subject = 'YaMDB код верификации'
+        subject = 'YaMDB confirmation code'
         message = (
             'Используйте этот код:\n'
             f'{confirmation_code}\n'
