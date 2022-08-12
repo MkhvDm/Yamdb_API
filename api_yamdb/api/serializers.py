@@ -5,12 +5,11 @@ from users.models import User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-    """Сериализатор модели юзера."""
+    """Сериализатор регистрации юзера."""
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username',
-                  'bio', 'email', 'role', 'confirmation_code')
+        fields = ('email', 'username')
 
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
