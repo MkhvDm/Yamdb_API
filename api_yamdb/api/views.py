@@ -1,5 +1,6 @@
 import random
 
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from rest_framework import mixins, status, viewsets
 from rest_framework.generics import get_object_or_404
@@ -8,8 +9,12 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from users.models import User
-from .serializers import SignUpSerializer, TokenObtainSerializer
+from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
+from .permissions import IsAuthorOrReadOnly
+from .serializers import (CommentSerializer, ReviewSerializer,
+                          SignUpSerializer, TokenObtainSerializer)
+
+User = get_user_model()
 
 
 class CreateUserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -73,3 +78,21 @@ class TokenObtainView(TokenObtainPairView):
             return Response(response, status=status.HTTP_200_OK)
         response = {'message': 'неверный код.'}
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthorOrReadOnly, )
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthorOrReadOnly, )
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
