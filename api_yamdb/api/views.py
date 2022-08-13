@@ -75,7 +75,7 @@ class TokenObtainView(TokenObtainPairView):
         user = self.get_queryset()
         if user.confirmation_code == request.data.get('confirmation_code'):
             response = {'token': self.get_token(user)}
-            return Response(response, status=status.HTTP_200_OK)
+            return Response(response, status=status.HTTP_201_CREATED)
         response = {'message': 'неверный код.'}
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
