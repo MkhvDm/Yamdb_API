@@ -7,7 +7,6 @@ class IsAuthorOrReadOnly(BasePermission):
 
     def has_permission(self, request, view):
         self.message = 'Необходима авторизация.'
-
         return (
             request.method in SAFE_METHODS or request.user.is_authenticated
         )
