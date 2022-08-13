@@ -4,7 +4,7 @@ from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from reviews.models import Comment, Review
+from reviews.models import Comment, Review, Category, Genre, Title
 
 User = get_user_model()
 
@@ -52,3 +52,23 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date', )
         model = Comment
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["name", "slug"]
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ["name", "slug"]
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Title
+        fields = "__all__"

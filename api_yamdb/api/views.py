@@ -12,7 +12,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (CommentSerializer, ReviewSerializer,
-                          SignUpSerializer, TokenObtainSerializer)
+                          SignUpSerializer, TokenObtainSerializer,
+                          CategorySerializer, GenreSerializer,
+                          TitleSerializer)
 
 User = get_user_model()
 
@@ -98,3 +100,17 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+class CategoriesViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class GenresViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    ordering_fields = ["name"]
