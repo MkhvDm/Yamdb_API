@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from reviews.models import Comment, Review
@@ -10,6 +11,20 @@ User = get_user_model()
 
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор регистрации юзера."""
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message='Already exists.'
+            )
+        ]
+    )
+    username = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(), message='Already exists.'
+            )
+        ]
+    )
 
     class Meta:
         model = User
