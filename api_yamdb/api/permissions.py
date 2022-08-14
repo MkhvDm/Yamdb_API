@@ -20,8 +20,9 @@ class IsAdminOrReadOnly(BasePermission):
     """Проверка на роль админа или доступ только на чтение."""
     message = ''
     def has_permission(self, request, view):
+        # user = get_object_or_404(get_user_model(), pk=pk)
         if request.method in SAFE_METHODS:
             return True
-        if request.user.is_authenticated:
-            return request.user.role == 'admin'
-        return False
+        # if request.user.is_authenticated:
+        return (request.user.is_authenticated and (request.user.role == 'admin' or request.user.is_superuser))
+        # return False

@@ -60,17 +60,43 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['name', 'slug']
 
+    # def create(self, validated_data):
+    #     category = Category.objects.create(**validated_data)
+    #     return category
+
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ['name', 'slug']
 
+    # def create(self, validated_data):
+    #     genre = Genre.objects.create(**validated_data)
+    #     return genre
 
-class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    genre = GenreSerializer(many=True, read_only=True)
+
+class TitleViewSerializer(serializers.ModelSerializer):
+    """Сериализатор произведения для получения экземпляра или списка."""
+    category = CategorySerializer(many=False, required=False)
+    genre = GenreSerializer(many=True, required=False)
+    # rating = serializers.IntegerField()
+
+    class Meta:
+        fields = ('id', 'name', 'year',
+                  'description', 'genre', 'category')
+        read_only_fields = ('genre', 'category', 'rating')
+        model = Title
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    """Сериализатор создания экземпляра произведения."""
+    genre = serializers.SlugRelatedField(many=True, write_only=True,
+                                         slug_field='slug', required=False,
+                                         queryset=Genre.objects.all())
+    category = serializers.SlugRelatedField(many=False, write_only=True,
+                                            slug_field='slug', required=False,
+                                            queryset=Category.objects.all())
 
     class Meta:
         model = Title
-        fields = ['id', 'name', 'year', 'category', 'genre', 'description']
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')

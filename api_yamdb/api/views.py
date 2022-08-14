@@ -15,7 +15,7 @@ from .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
 from .serializers import (CommentSerializer, ReviewSerializer,
                           SignUpSerializer, TokenObtainSerializer,
                           CategorySerializer, GenreSerializer,
-                          TitleSerializer)
+                          TitleViewSerializer, TitlePostSerializer)
 from .filters import TitlesFilter
 
 User = get_user_model()
@@ -116,11 +116,7 @@ class CategoriesViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-class GenresViewSet(mixins.ListModelMixin,
-                    mixins.CreateModelMixin,
-                    mixins.DestroyModelMixin,
-                    viewsets.GenericViewSet,
-                    ):
+class GenresViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -129,13 +125,14 @@ class GenresViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-class TitleViewSet(mixins.ListModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet
-                   ):
+class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    # pagination_class = rest_framework.pagination.PageNumberPagination
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
 
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH'):
+            return TitleViewSerializer
+        return TitlePostSerializer
