@@ -108,6 +108,7 @@ class CategoriesViewSet(mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         viewsets.GenericViewSet
                         ):
+    """Вьюсет для Категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly, )
@@ -116,7 +117,12 @@ class CategoriesViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(mixins.ListModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet
+                    ):
+    """Вьюсет для жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -126,13 +132,13 @@ class GenresViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для произведений."""
     queryset = Title.objects.all()
-    # pagination_class = rest_framework.pagination.PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH'):
-            return TitleViewSerializer
-        return TitlePostSerializer
+            return TitlePostSerializer
+        return TitleViewSerializer
