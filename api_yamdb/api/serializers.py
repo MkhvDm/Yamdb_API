@@ -33,6 +33,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
     """Сериализатор получения токена по запросу."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['confirmation_code'] = self.fields['password']
@@ -42,7 +43,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date', )
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
         model = Review
 
 
@@ -50,8 +51,9 @@ class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date', )
+        fields = ('id', 'text', 'author', 'pub_date',)
         model = Comment
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

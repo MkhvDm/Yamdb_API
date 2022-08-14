@@ -2,7 +2,7 @@ import random
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, status, viewsets, filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -20,7 +20,6 @@ User = get_user_model()
 
 
 class CreateUserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-
     pass
 
 
@@ -85,7 +84,7 @@ class TokenObtainView(TokenObtainPairView):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrReadOnly, )
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -96,21 +95,38 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrReadOnly, )
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-class CategoriesViewSet(viewsets.ModelViewSet):
+
+class CategoriesViewSet(mixins.ListModelMixin,
+                        mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet
+                        ):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(mixins.ListModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet,
+                    ):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    # filter_backends = (filters.SearchFilter,)
+    # search_fields = ('=name',)
+    # lookup_field = 'slug'
 
-class TitleViewSet(viewsets.ModelViewSet):
+
+class TitleViewSet(mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   viewsets.GenericViewSet
+                   ):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     ordering_fields = ["name"]
