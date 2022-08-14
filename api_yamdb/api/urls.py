@@ -26,7 +26,7 @@ router_api_v1.register(
 )
 router_api_v1.register(
     'genres',
-    TitleViewSet, basename='genres'
+    GenresViewSet, basename='genres'
 )
 
 
