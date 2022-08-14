@@ -2,23 +2,28 @@ import random
 
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, status, viewsets, filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
-from .permissions import IsModerator, IsAdmin, IsAuthor, ReadOnly
+
+from .permissions import (IsAuthorOrReadOnly, IsAdminOrReadOnly, IsModerator, 
+                          IsAdmin, IsAuthor, ReadOnly)
 from .serializers import (CommentSerializer, ReviewSerializer,
-                          SignUpSerializer, TokenObtainSerializer)
+                          SignUpSerializer, TokenObtainSerializer,
+                          CategorySerializer, GenreSerializer,
+                          TitleViewSerializer, TitlePostSerializer)
+from .filters import TitlesFilter
 
 User = get_user_model()
 
 
 class CreateUserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-
     pass
 
 
@@ -104,3 +109,44 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user,
                         review=review)
+
+
+class CategoriesViewSet(mixins.ListModelMixin,
+                        mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet
+                        ):
+    """Вьюсет для Категорий."""
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly, )
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class GenresViewSet(mixins.ListModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet
+                    ):
+    """Вьюсет для жанров."""
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для произведений."""
+    queryset = Title.objects.all()
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitlesFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH'):
+            return TitlePostSerializer
+        return TitleViewSerializer
