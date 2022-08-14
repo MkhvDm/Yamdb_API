@@ -8,13 +8,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
-from .permissions import IsAuthorOrReadOnly
+from .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
 from .serializers import (CommentSerializer, ReviewSerializer,
                           SignUpSerializer, TokenObtainSerializer,
                           CategorySerializer, GenreSerializer,
                           TitleSerializer)
+from .filters import TitlesFilter
 
 User = get_user_model()
 
@@ -108,6 +110,10 @@ class CategoriesViewSet(mixins.ListModelMixin,
                         ):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly, )
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenresViewSet(mixins.ListModelMixin,
@@ -117,9 +123,10 @@ class GenresViewSet(mixins.ListModelMixin,
                     ):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('=name',)
-    # lookup_field = 'slug'
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(mixins.ListModelMixin,
@@ -129,4 +136,6 @@ class TitleViewSet(mixins.ListModelMixin,
                    ):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    ordering_fields = ["name"]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitlesFilter
+

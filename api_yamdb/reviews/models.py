@@ -17,11 +17,19 @@ class Category(models.Model):
     def __str__(self):
         return f'category: {self.name}, slug: {self.slug}'
 
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
 
 class Genre(models.Model):
     """Модель жанра произведения."""
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True)
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):
@@ -44,6 +52,10 @@ class Title(models.Model):
         through='TitleGenre',
         related_name='titles'
     )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
 
 class TitleGenre(models.Model):
