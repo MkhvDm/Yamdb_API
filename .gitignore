@@ -149,3 +149,5 @@ dmypy.json
 media/
 
 .sent_emails/*
+
+tokens.txt

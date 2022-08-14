@@ -11,7 +11,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
-from .permissions import IsAuthorOrReadOnly, IsAdminOrReadOnly
+
+from .permissions import (IsAuthorOrReadOnly, IsAdminOrReadOnly, IsModerator, 
+                          IsAdmin, IsAuthor, ReadOnly)
 from .serializers import (CommentSerializer, ReviewSerializer,
                           SignUpSerializer, TokenObtainSerializer,
                           CategorySerializer, GenreSerializer,
@@ -86,7 +88,7 @@ class TokenObtainView(TokenObtainPairView):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -95,12 +97,18 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
+
+    def get_queryset(self):
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        new_queryset = review.comments.all()
+        return new_queryset
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        serializer.save(author=self.request.user,
+                        review=review)
 
 
 class CategoriesViewSet(mixins.ListModelMixin,

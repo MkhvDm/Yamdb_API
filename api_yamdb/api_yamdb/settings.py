@@ -126,10 +126,8 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-from datetime import timedelta
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
