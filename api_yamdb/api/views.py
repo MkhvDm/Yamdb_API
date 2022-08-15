@@ -18,6 +18,7 @@ from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
 from .filters import TitlesFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthor, IsModerator,
                           ReadOnly)
+
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitlePostSerializer, TitleViewSerializer,
@@ -84,9 +85,13 @@ class TokenObtainView(TokenObtainPairView):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
+    permission_classes = [IsAuthor | IsModerator | IsAdmin | ReadOnly]
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        new_queryset = title.reviews.all()
+        return new_queryset
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))

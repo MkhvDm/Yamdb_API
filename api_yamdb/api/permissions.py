@@ -33,10 +33,12 @@ class IsModerator(BasePermission):
     message = 'Необходимы права модератора.'
 
     def has_permission(self, request, view):
-
         return (
-            request.user.is_authenticated and request.user.role == 'moderator'
+            request.user.is_authenticated and request.user.is_moderator()
         )
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
 
 
 class IsAdmin(BasePermission):
@@ -44,12 +46,14 @@ class IsAdmin(BasePermission):
     message = 'Необходимы права администратора.'
 
     def has_permission(self, request, view):
-
         return (
             request.user.is_authenticated
-            and request.user.role == 'admin'
+            and request.user.is_admin()
             or request.user.is_superuser
         )
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
 
 
 class IsAuthor(BasePermission):
@@ -69,3 +73,7 @@ class ReadOnly(BasePermission):
     """Allows access for reading."""
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
+
