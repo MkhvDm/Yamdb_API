@@ -12,7 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
 
-from .permissions import (IsAuthorOrReadOnly, IsAdminOrReadOnly, IsModerator, 
+from .permissions import (IsAdminOrReadOnly, IsModerator,
                           IsAdmin, IsAuthor, ReadOnly)
 from .serializers import (CommentSerializer, ReviewSerializer,
                           SignUpSerializer, TokenObtainSerializer,
