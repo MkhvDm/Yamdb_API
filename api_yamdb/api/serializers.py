@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from reviews.models import Comment, Review, Category, Genre, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 User = get_user_model()
@@ -11,8 +11,6 @@ User = get_user_model()
 
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор регистрации юзера."""
-    email = serializers.EmailField()
-    username = serializers.CharField()
 
     class Meta:
         model = User
@@ -26,7 +24,6 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
     """Сериализатор получения токена по запросу."""
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['confirmation_code'] = self.fields['password']
@@ -92,8 +89,6 @@ class TitlePostSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор обращений к users/."""
-    email = serializers.EmailField()
-    username = serializers.CharField()
 
     class Meta:
         model = User
