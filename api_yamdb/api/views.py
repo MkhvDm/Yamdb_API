@@ -15,14 +15,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
 
-from .permissions import (IsAdminOrReadOnly, IsModerator, IsAuthenticatedAndAdmin,
-                          IsAdmin, IsAuthor, ReadOnly)
+from .filters import TitlesFilter
+from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthor, IsModerator,
+                          ReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitlePostSerializer, TitleViewSerializer,
                           TokenObtainSerializer, UserSerializer)
-from .filters import TitlesFilter
-
 
 User = get_user_model()
 
@@ -154,7 +153,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class UsersAPIView(ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticatedAndAdmin]
+    permission_classes = (IsAdmin,)
     pagination_class = LimitOffsetPagination
     search_fields = ('=username',)
 
@@ -162,13 +161,13 @@ class UsersAPIView(ListCreateAPIView):
 class ProfileAPIView(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticatedAndAdmin]
+    permission_classes = (IsAdmin,)
     lookup_field = 'username'
 
 
 class SelfProfileAPIView(RetrieveUpdateAPIView):
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         return User.objects.get(pk=self.request.user.pk)

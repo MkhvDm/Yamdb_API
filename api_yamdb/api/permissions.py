@@ -69,21 +69,3 @@ class ReadOnly(BasePermission):
     """Allows access for reading."""
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
-
-
-class IsAuthenticatedAndAdmin(BasePermission):
-    """Authenticated administrator."""
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_admin()
-
-
-class IsAuthenticatedAndModerator(BasePermission):
-    """Authenticated moderator."""
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_moderator()
-
-
-class IsAuthenticatedAndSuperUser(BasePermission):
-    """Authenticated superuser."""
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_superuser
