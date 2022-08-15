@@ -171,3 +171,18 @@ class SelfProfileAPIView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return User.objects.get(pk=self.request.user.pk)
+
+    def partial_update(self, request, *args, **kwargs):
+        request_role = self.request.user.role
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True
+        )
+        if serializer.is_valid(raise_exception=True):
+            if request_role == 'user':
+                serializer.validated_data['role'] = 'user'
+                serializer.save()
+                self.perform_update(serializer)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
