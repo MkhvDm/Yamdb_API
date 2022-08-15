@@ -9,15 +9,14 @@ from rest_framework.generics import (CreateAPIView, ListCreateAPIView,
                                      RetrieveUpdateDestroyAPIView,
                                      get_object_or_404)
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
 
 from .permissions import (IsAdmin, IsAdminOrReadOnly, IsModerator,
-                          IsAuthenticatedAndAdmin, IsAuthor, ReadOnly,
-                          IsAdminModeratorAuthorOrReadOnly)
+                          IsAuthor, ReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitlePostSerializer, TitleViewSerializer,
@@ -87,8 +86,7 @@ class TokenObtainView(TokenObtainPairView):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    # permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
-    permission_classes = [IsAdminModeratorAuthorOrReadOnly, ]
+    permission_classes = [IsAuthor | IsModerator | IsAdmin | ReadOnly]
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -103,8 +101,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    # permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
-    permission_classes = [IsAdminModeratorAuthorOrReadOnly, ]
+    permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
@@ -161,7 +158,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class UsersAPIView(ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticatedAndAdmin]
+    permission_classes = [IsAdmin]
     pagination_class = LimitOffsetPagination
     search_fields = ('=username',)
 
@@ -169,7 +166,7 @@ class UsersAPIView(ListCreateAPIView):
 class ProfileAPIView(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticatedAndAdmin]
+    permission_classes = [IsAdmin]
     lookup_field = 'username'
 
 
