@@ -15,13 +15,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
 
-from .filters import TitlesFilter
-from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthenticatedAndAdmin,
-                          IsAuthor, IsModerator, ReadOnly)
+from .permissions import (IsAdminOrReadOnly, IsModerator, IsAuthenticatedAndAdmin,
+                          IsAdmin, IsAuthor, ReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitlePostSerializer, TitleViewSerializer,
                           TokenObtainSerializer, UserSerializer)
+from .filters import TitlesFilter
+
 
 User = get_user_model()
 

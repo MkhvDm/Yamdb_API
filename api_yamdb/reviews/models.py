@@ -58,6 +58,11 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
+    @property
+    def rating(self):
+        """Returns AVG score."""
+        return self.reviews.aggregate(rating=models.Avg('score')).get('rating')
+
 
 class TitleGenre(models.Model):
     """Модель для связи между произведениями и их жанрами."""
