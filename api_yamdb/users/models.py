@@ -65,12 +65,6 @@ class User(AbstractUser):
 
     objects = UserManager()
 
-    def is_admin(self):
-        return self.is_staff or self.role == self.ADMIN
-
-    def is_moderator(self):
-        return self.role == self.MODERATOR
-
     def __str__(self):
         return self.username
 
