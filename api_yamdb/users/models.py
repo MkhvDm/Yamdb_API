@@ -28,7 +28,25 @@ class User(AbstractUser):
     confirmation_code = models.CharField(
         'confirmation_code',
         max_length=6,
-        null=True)
+        null=True,
+    )
+
+    email = models.EmailField(
+        max_length=254,
+        unique=True,
+        blank=False,
+        null=False,
+    )
+
+    def is_admin(self):
+        return self.is_staff or self.role == self.ADMIN
+
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
     def __str__(self):
         return self.username
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'

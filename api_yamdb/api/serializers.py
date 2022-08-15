@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from reviews.models import Comment, Review, Category, Genre, Title
@@ -12,24 +11,17 @@ User = get_user_model()
 
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор регистрации юзера."""
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(
-                queryset=User.objects.all(), message='Already exists.'
-            )
-        ]
-    )
-    username = serializers.CharField(
-        validators=[
-            UniqueValidator(
-                queryset=User.objects.all(), message='Already exists.'
-            )
-        ]
-    )
+    email = serializers.EmailField()
+    username = serializers.CharField()
 
     class Meta:
         model = User
         fields = ('email', 'username')
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError('name reserved.')
+        return value
 
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
@@ -96,3 +88,14 @@ class TitlePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор обращений к users/."""
+    email = serializers.EmailField()
+    username = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
