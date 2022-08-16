@@ -11,14 +11,13 @@ from rest_framework.generics import (CreateAPIView, ListCreateAPIView,
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
+from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitlesFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthor, IsModerator,
                           ReadOnly)
-
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitlePostSerializer, TitleViewSerializer,
@@ -72,16 +71,21 @@ class TokenObtainView(TokenObtainPairView):
         )
 
     def get_token(self, user):
-        refresh = RefreshToken.for_user(user)
-        return str(refresh.access_token)
+        token = AccessToken.for_user(user)
+        return str(token)
 
     def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        confirmation_code = serializer.validated_data['confirmation_code']
         user = self.get_queryset()
-        if user.confirmation_code == request.data.get('confirmation_code'):
-            response = {'token': self.get_token(user)}
-            return Response(response, status=status.HTTP_200_OK)
-        response = {'message': 'не верный код.'}
-        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        if user.confirmation_code == confirmation_code:
+            return Response(
+                {'token': self.get_token()}, status=status.HTTP_200_OK
+            )
+        return Response(
+            {'message': 'неверный код.'}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -156,28 +160,34 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class UsersAPIView(ListCreateAPIView):
+    """
+    Администратор получает список зарегистрированных
+    пользователей и может добавить нового.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = [IsAdmin]
     pagination_class = LimitOffsetPagination
     search_fields = ('=username',)
 
 
 class ProfileAPIView(RetrieveUpdateDestroyAPIView):
+    """Профили пользователей."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = [IsAdmin]
     lookup_field = 'username'
 
 
 class SelfProfileAPIView(RetrieveUpdateAPIView):
+    """Профиль пользователя, который он может редактировать."""
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return User.objects.get(pk=self.request.user.pk)
 
-    def partial_update(self, request, *args, **kwargs):
+    def partial_update(self, request):
         request_role = self.request.user.role
         instance = self.get_object()
         serializer = self.get_serializer(

@@ -8,7 +8,7 @@ class IsAuthorOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         self.message = 'Необходима авторизация.'
         return (
-                request.method in SAFE_METHODS or request.user.is_authenticated
+            request.method in SAFE_METHODS or request.user.is_authenticated
         )
 
     def has_object_permission(self, request, view, obj):
@@ -34,7 +34,7 @@ class IsModerator(BasePermission):
 
     def has_permission(self, request, view):
         return (
-            request.user.is_authenticated and request.user.is_moderator()
+            request.user.is_authenticated and request.user.role == 'moderator'
         )
 
     def has_object_permission(self, request, view, obj):
@@ -48,7 +48,7 @@ class IsAdmin(BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
-            and request.user.is_admin()
+            and request.user.role == 'admin'
             or request.user.is_superuser
         )
 
@@ -76,4 +76,3 @@ class ReadOnly(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view)
-

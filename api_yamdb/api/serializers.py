@@ -1,17 +1,20 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.generics import get_object_or_404
-
+from rest_framework.validators import UniqueValidator
 from reviews.models import Category, Comment, Genre, Review, Title
-
 
 User = get_user_model()
 
 
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор регистрации юзера."""
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
 
     class Meta:
         model = User
@@ -23,11 +26,12 @@ class SignUpSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenObtainSerializer(TokenObtainPairSerializer):
-    """Сериализатор получения токена по запросу."""
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['confirmation_code'] = self.fields['password']
+class TokenObtainSerializer(serializers.Serializer):
+    confirmation_code = serializers.CharField()
+    username = serializers.CharField()
+
+    class Meta:
+        fields = ('confirmation_code', 'username')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
