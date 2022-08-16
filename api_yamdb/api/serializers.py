@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.validators import UniqueValidator
 from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
@@ -9,6 +9,12 @@ User = get_user_model()
 
 class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор регистрации юзера."""
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
 
     class Meta:
         model = User
@@ -20,23 +26,12 @@ class SignUpSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenObtainSerializer(TokenObtainPairSerializer):
-    """Сериализатор получения токена по запросу."""
-    # confirmation_code = serializers.IntegerField()
+class TokenObtainSerializer(serializers.Serializer):
+    confirmation_code = serializers.CharField()
+    username = serializers.CharField()
 
-    def __init__(self, *args, **kwargs):
-        print('\tTOKEN SERIALIZER')
-        super().__init__(*args, **kwargs)
-        self.fields['confirmation_code'] = serializers.IntegerField()
-        print('fields before:', self.fields)
-        # self.fields['confirmation_code'] = self.fields['password']
-        print('fields after:', self.fields)
-
-    def validate(self, attrs):
-        print('validate!!')
-        data = super().validate(self, attrs)
-        print(data)
-        return data
+    class Meta:
+        fields = ('confirmation_code', 'username')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
