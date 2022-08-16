@@ -3,6 +3,7 @@ import random
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.exceptions import ValidationError
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.generics import (CreateAPIView, ListCreateAPIView,
                                      RetrieveUpdateAPIView,
@@ -65,8 +66,6 @@ class TokenObtainView(TokenObtainPairView):
     serializer_class = TokenObtainSerializer
 
     def get_queryset(self):
-        user = get_object_or_404(User, username=self.request.data.get('username'))
-        print('TOKEN USER:', user)
         return get_object_or_404(
             User, username=self.request.data.get('username')
         )
@@ -76,9 +75,7 @@ class TokenObtainView(TokenObtainPairView):
         return str(refresh.access_token)
 
     def post(self, request):
-
         user = self.get_queryset()
-        print('request.data:', request.data)
         if user.confirmation_code == request.data.get('confirmation_code'):
             response = {'token': self.get_token(user)}
             return Response(response, status=status.HTTP_200_OK)
