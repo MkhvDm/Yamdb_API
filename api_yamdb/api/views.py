@@ -13,7 +13,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
+from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitlesFilter
 from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthor, IsModerator,
@@ -30,7 +30,7 @@ class SignUpAPIView(CreateAPIView):
     """Создать пользователя и отправить код на почту."""
     queryset = User.objects.all()
     serializer_class = SignUpSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = [AllowAny]
 
     def generate_confirmation_code(self):
         return random.randrange(111111, 999999, 6)
@@ -80,14 +80,22 @@ class TokenObtainView(TokenObtainPairView):
         confirmation_code = serializer.validated_data['confirmation_code']
         user = self.get_queryset()
         if user.confirmation_code == confirmation_code:
-            return Response({'token': self.get_token()}, status=status.HTTP_200_OK)
-        return Response({'message': 'неверный код.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'token': self.get_token()}, status=status.HTTP_200_OK
+            )
+        return Response(
+            {'message': 'неверный код.'}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
+    permission_classes = [IsAuthor | IsModerator | IsAdmin | ReadOnly]
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        new_queryset = title.reviews.all()
+        return new_queryset
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -152,23 +160,29 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class UsersAPIView(ListCreateAPIView):
+    """
+    Администратор получает список зарегистрированных
+    пользователей и может добавить нового.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = [IsAdmin]
     pagination_class = LimitOffsetPagination
     search_fields = ('=username',)
 
 
 class ProfileAPIView(RetrieveUpdateDestroyAPIView):
+    """Профили пользователей."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = [IsAdmin]
     lookup_field = 'username'
 
 
 class SelfProfileAPIView(RetrieveUpdateAPIView):
+    """Профиль пользователя, который он может редактировать."""
     serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return User.objects.get(pk=self.request.user.pk)
