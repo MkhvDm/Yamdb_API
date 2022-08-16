@@ -13,12 +13,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
+from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitlesFilter
-from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthor, IsModerator,
-                          ReadOnly)
-
+from .permissions import IsAdmin, IsAuthor, IsModerator, ReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitlePostSerializer, TitleViewSerializer,
@@ -67,6 +65,8 @@ class TokenObtainView(TokenObtainPairView):
     serializer_class = TokenObtainSerializer
 
     def get_queryset(self):
+        user = get_object_or_404(User, username=self.request.data.get('username'))
+        print('TOKEN USER:', user)
         return get_object_or_404(
             User, username=self.request.data.get('username')
         )
@@ -76,7 +76,9 @@ class TokenObtainView(TokenObtainPairView):
         return str(refresh.access_token)
 
     def post(self, request):
+
         user = self.get_queryset()
+        print('request.data:', request.data)
         if user.confirmation_code == request.data.get('confirmation_code'):
             response = {'token': self.get_token(user)}
             return Response(response, status=status.HTTP_200_OK)
@@ -85,6 +87,7 @@ class TokenObtainView(TokenObtainPairView):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Вьюсет для рецензий."""
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthor | IsModerator | IsAdmin | ReadOnly]
 
@@ -100,6 +103,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Вьюсет для комментариев."""
     serializer_class = CommentSerializer
     permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
 
@@ -122,7 +126,7 @@ class CategoriesViewSet(mixins.ListModelMixin,
     """Вьюсет для Категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = [IsAdmin | ReadOnly]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -136,7 +140,7 @@ class GenresViewSet(mixins.ListModelMixin,
     """Вьюсет для жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = [IsAdmin | ReadOnly]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -145,7 +149,7 @@ class GenresViewSet(mixins.ListModelMixin,
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений."""
     queryset = Title.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = [IsAdmin | ReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
 

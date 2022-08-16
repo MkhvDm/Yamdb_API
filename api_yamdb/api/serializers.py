@@ -2,10 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.generics import get_object_or_404
-
 from reviews.models import Category, Comment, Genre, Review, Title
-
 
 User = get_user_model()
 
@@ -25,12 +22,25 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
     """Сериализатор получения токена по запросу."""
+    # confirmation_code = serializers.IntegerField()
+
     def __init__(self, *args, **kwargs):
+        print('\tTOKEN SERIALIZER')
         super().__init__(*args, **kwargs)
-        self.fields['confirmation_code'] = self.fields['password']
+        self.fields['confirmation_code'] = serializers.IntegerField()
+        print('fields before:', self.fields)
+        # self.fields['confirmation_code'] = self.fields['password']
+        print('fields after:', self.fields)
+
+    def validate(self, attrs):
+        print('validate!!')
+        data = super().validate(self, attrs)
+        print(data)
+        return data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор для рецензий."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -39,7 +49,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Rejects more than one review on title from user."""
-        if self.context.get('request').method == 'POST':  # may be flag in view
+        if self.context.get('request').method == 'POST':
             title_id = self.context.get('view').kwargs.get('title_id')
             user = self.context.get('request').user
             if user.reviews.filter(title=title_id):
@@ -51,6 +61,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для комментариев."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
