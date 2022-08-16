@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (CategoriesViewSet, CommentViewSet, GenresViewSet,
                     ProfileAPIView, ReviewViewSet, SelfProfileAPIView,
-                    SignUpAPIView, TitleViewSet, TokenObtainView, UsersAPIView)
+                    SignUpAPIView, TitleViewSet, UsersAPIView, TokenObtainView)
 
 router_api_v1 = DefaultRouter()
 router_api_v1.register(
