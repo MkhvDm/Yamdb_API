@@ -1,5 +1,6 @@
-from django.core.management.base import BaseCommand
 import csv
+
+from django.core.management.base import BaseCommand
 from reviews import models
 from users.models import User
 
@@ -48,7 +49,9 @@ class Command(BaseCommand):
                         for item in fk_names.items():
                             if key in item[1]:
                                 fk_model = models_assignments[item[0]]
-                                fk_inst = fk_model.objects.get(pk=int(row[key]))
+                                fk_inst = fk_model.objects.get(
+                                    pk=int(row[key])
+                                )
                                 row[key] = fk_inst
                     model.objects.update_or_create(**row)
             print(f'Loading "{table}" done!')
