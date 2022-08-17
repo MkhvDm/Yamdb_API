@@ -4,11 +4,12 @@ from django.db import models
 
 class UserManager(BaseUserManager):
     """Custom user manager."""
+
     def create_user(self, username, email, password, **extra_fields):
         if not username:
             raise ValueError('Username must be set')
         if not email:
-            raise ValueError('The Email must be set')
+            raise ValueError('Email must be set')
 
         email = self.normalize_email(email)
         user = self.model(username=username, email=email, **extra_fields)
@@ -28,6 +29,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     """Custom user."""
+
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
@@ -49,12 +51,6 @@ class User(AbstractUser):
         blank=True,
     )
 
-    confirmation_code = models.CharField(
-        'confirmation_code',
-        max_length=6,
-        null=True,
-    )
-
     email = models.EmailField(
         'email',
         max_length=254,
@@ -64,6 +60,14 @@ class User(AbstractUser):
     )
 
     objects = UserManager()
+
+    @property
+    def is_admin(self):
+        return self.role == self.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
     def __str__(self):
         return self.username
