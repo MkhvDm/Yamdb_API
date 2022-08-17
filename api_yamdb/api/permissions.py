@@ -38,7 +38,7 @@ class IsAuthor(BasePermission):
         return request.method in SAFE_METHODS or request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        self.message = 'Необходима авторство.'
+        self.message = 'Необходимо авторство.'
         return request.user == obj.author
 
 

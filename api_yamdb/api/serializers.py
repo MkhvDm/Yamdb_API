@@ -40,14 +40,14 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date',)
+        exclude = ('title', )
 
     def validate(self, data):
         """Rejects more than one review on title from user."""
         if self.context.get('request').method == 'POST':
             title_id = self.context.get('view').kwargs.get('title_id')
             user = self.context.get('request').user
-            if user.reviews.filter(title=title_id):
+            if user.reviews.filter(title=title_id).exists():
                 raise serializers.ValidationError({
                     'review create error': ('Вы можете оставить только '
                                             'одну рецензию на произведение!')
@@ -61,7 +61,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'pub_date',)
+        exclude = ('review',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
