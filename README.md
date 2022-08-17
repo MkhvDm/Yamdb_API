@@ -1,6 +1,7 @@
 # YAMDb API
+
+<h3>_Сервис с рецензиями на произведения_</h3>
 ![](https://img.shields.io/github/stars/pandao/editor.md.svg) ![](https://img.shields.io/github/forks/pandao/editor.md.svg) ![](https://img.shields.io/github/tag/pandao/editor.md.svg) ![](https://img.shields.io/github/release/pandao/editor.md.svg) ![](https://img.shields.io/github/issues/pandao/editor.md.svg)
-## _Сервис с рецензиями на произведения_
 
 ## Возможности
 - Оставляй рецензии на произведения разных категорий и жанров - кино, книги, музыку etc.
