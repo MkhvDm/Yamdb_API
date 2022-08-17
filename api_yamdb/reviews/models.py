@@ -14,12 +14,11 @@ class Category(models.Model):
         unique=True, max_length=50
     )
 
-    def __str__(self):
-        return f'category: {self.name}, slug: {self.slug}'
-
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+    def __str__(self):
+        return f'category: {self.name}, slug: {self.slug}'
 
 
 class Genre(models.Model):

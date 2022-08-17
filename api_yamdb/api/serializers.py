@@ -68,14 +68,14 @@ class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий."""
     class Meta:
         model = Category
-        fields = ('name', 'slug')
+        exclude = ('id',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанра."""
     class Meta:
         model = Genre
-        fields = ('name', 'slug')
+        exclude = ('id',)
 
 
 class TitleViewSerializer(serializers.ModelSerializer):
@@ -87,9 +87,7 @@ class TitleViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
-        )
+        fields = '__all__'
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
