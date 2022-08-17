@@ -1,6 +1,6 @@
-import random
-
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -31,9 +31,6 @@ class SignUpAPIView(CreateAPIView):
     serializer_class = SignUpSerializer
     permission_classes = [AllowAny]
 
-    def generate_confirmation_code(self):
-        return random.randrange(111111, 999999, 6)
-
     def send_confirmation_code_to_mail(self, email, confirmation_code):
         subject = 'YaMDB confirmation code'
         message = (
@@ -41,17 +38,18 @@ class SignUpAPIView(CreateAPIView):
             f'{confirmation_code}\n'
             'для получения токена.'
         )
-        from_email = 'reg@yamdb.com'
+        from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [email, ]
         send_mail(subject, message, from_email, recipient_list)
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            confirmation_code = self.generate_confirmation_code()
             email = serializer.validated_data['email']
-            serializer.validated_data['confirmation_code'] = confirmation_code
+            username = serializer.validated_data['username']
             serializer.save()
+            user = get_object_or_404(User, username=username)
+            confirmation_code = default_token_generator.make_token(user)
             self.send_confirmation_code_to_mail(email, confirmation_code)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -78,9 +76,9 @@ class TokenObtainView(TokenObtainPairView):
         serializer.is_valid(raise_exception=True)
         confirmation_code = serializer.validated_data['confirmation_code']
         user = self.get_queryset()
-        if user.confirmation_code == confirmation_code:
+        if default_token_generator.check_token(user, confirmation_code):
             return Response(
-                {'token': self.get_token()}, status=status.HTTP_200_OK
+                {'token': self.get_token(user)}, status=status.HTTP_200_OK
             )
         return Response(
             {'message': 'неверный код.'}, status=status.HTTP_400_BAD_REQUEST

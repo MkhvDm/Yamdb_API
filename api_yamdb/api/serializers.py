@@ -27,6 +27,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenObtainSerializer(serializers.Serializer):
+    """Сериализатор токена доступа."""
     confirmation_code = serializers.CharField()
     username = serializers.CharField()
 

@@ -136,4 +136,8 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
+EMAIL_USE_TLS = True
+
+DEFAULT_FROM_EMAIL = 'YaMDB <noreply@yamdb.com>'
+
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
