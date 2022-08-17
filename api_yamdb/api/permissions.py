@@ -1,33 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class IsAuthorOrReadOnly(BasePermission):
-    """Allows access (change/delete) only for author user."""
-    message = ''
-
-    def has_permission(self, request, view):
-        self.message = 'Необходима авторизация.'
-        return (
-            request.method in SAFE_METHODS or request.user.is_authenticated
-        )
-
-    def has_object_permission(self, request, view, obj):
-        self.message = 'Необходима авторство.'
-        return request.method in SAFE_METHODS or request.user == obj.author
-
-
-class IsAdminOrReadOnly(BasePermission):
-    """Проверка на роль админа или доступ только на чтение."""
-    message = ''
-
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        if request.user.is_authenticated:
-            return request.user.is_admin or request.user.is_superuser
-        return False
-
-
 class IsModerator(BasePermission):
     """Allows access only for moderators."""
     message = 'Необходимы права модератора.'
@@ -65,7 +38,7 @@ class IsAuthor(BasePermission):
         return request.method in SAFE_METHODS or request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        self.message = 'Необходима авторство.'
+        self.message = 'Необходимо авторство.'
         return request.user == obj.author
 
 

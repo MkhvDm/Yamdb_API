@@ -27,6 +27,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenObtainSerializer(serializers.Serializer):
+    """Сериализатор токена доступа."""
     confirmation_code = serializers.CharField()
     username = serializers.CharField()
 
@@ -35,18 +36,19 @@ class TokenObtainSerializer(serializers.Serializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор для рецензий."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date',)
+        exclude = ('title', )
 
     def validate(self, data):
         """Rejects more than one review on title from user."""
-        if self.context.get('request').method == 'POST':  # may be flag in view
+        if self.context.get('request').method == 'POST':
             title_id = self.context.get('view').kwargs.get('title_id')
             user = self.context.get('request').user
-            if user.reviews.filter(title=title_id):
+            if user.reviews.filter(title=title_id).exists():
                 raise serializers.ValidationError({
                     'review create error': ('Вы можете оставить только '
                                             'одну рецензию на произведение!')
@@ -55,25 +57,26 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для комментариев."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'pub_date',)
+        exclude = ('review',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий."""
     class Meta:
         model = Category
-        fields = ('name', 'slug')
+        exclude = ('id',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанра."""
     class Meta:
         model = Genre
-        fields = ('name', 'slug')
+        exclude = ('id',)
 
 
 class TitleViewSerializer(serializers.ModelSerializer):
@@ -85,9 +88,7 @@ class TitleViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = (
-            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
-        )
+        fields = '__all__'
 
 
 class TitlePostSerializer(serializers.ModelSerializer):

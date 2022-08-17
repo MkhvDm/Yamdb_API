@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-User = get_user_model()
+user = get_user_model()
 
 
 class Category(models.Model):
@@ -14,12 +14,11 @@ class Category(models.Model):
         unique=True, max_length=50
     )
 
-    def __str__(self):
-        return f'category: {self.name}, slug: {self.slug}'
-
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+    def __str__(self):
+        return f'category: {self.name}, slug: {self.slug}'
 
 
 class Genre(models.Model):
@@ -85,7 +84,7 @@ class Review(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        User,
+        user,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
@@ -119,7 +118,7 @@ class Comment(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        User,
+        user,
         on_delete=models.CASCADE,
         related_name='comments'
     )
@@ -129,3 +128,6 @@ class Comment(models.Model):
         ordering = ('-pub_date', )
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return f'{self.text[:50]}...'

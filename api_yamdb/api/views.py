@@ -16,8 +16,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitlesFilter
-from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthor, IsModerator,
-                          ReadOnly)
+from .permissions import IsAdmin, IsAuthor, IsModerator, ReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer, SignUpSerializer,
                           TitlePostSerializer, TitleViewSerializer,
@@ -28,7 +27,6 @@ User = get_user_model()
 
 class SignUpAPIView(CreateAPIView):
     """Создать пользователя и отправить код на почту."""
-
     queryset = User.objects.all()
     serializer_class = SignUpSerializer
     permission_classes = [AllowAny]
@@ -62,7 +60,6 @@ class SignUpAPIView(CreateAPIView):
 
 class TokenObtainView(TokenObtainPairView):
     """Получить токен доступа по коду из письма."""
-
     serializer_class = TokenObtainSerializer
 
     def get_queryset(self):
@@ -89,6 +86,7 @@ class TokenObtainView(TokenObtainPairView):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Вьюсет для рецензий."""
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthor | IsModerator | IsAdmin | ReadOnly]
 
@@ -104,16 +102,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Вьюсет для комментариев."""
     serializer_class = CommentSerializer
     permission_classes = [IsModerator | IsAdmin | IsAuthor | ReadOnly]
 
     def get_queryset(self):
-        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'),
+                                   title=self.kwargs.get('title_id'))
         new_queryset = review.comments.all()
         return new_queryset
 
     def perform_create(self, serializer):
-        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'),
+                                   title=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user,
                         review=review)
 
@@ -126,7 +127,7 @@ class CategoriesViewSet(mixins.ListModelMixin,
     """Вьюсет для Категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = [IsAdmin | ReadOnly]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -140,7 +141,7 @@ class GenresViewSet(mixins.ListModelMixin,
     """Вьюсет для жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = [IsAdmin | ReadOnly]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -149,7 +150,7 @@ class GenresViewSet(mixins.ListModelMixin,
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений."""
     queryset = Title.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = [IsAdmin | ReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter
 
