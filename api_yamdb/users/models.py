@@ -4,7 +4,6 @@ from django.db import models
 
 class UserManager(BaseUserManager):
     """Custom user manager."""
-
     def create_user(self, username, email, password, **extra_fields):
         if not username:
             raise ValueError('Username must be set')
@@ -29,7 +28,6 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     """Custom user."""
-
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
@@ -61,6 +59,10 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
     @property
     def is_admin(self):
         return self.is_staff or self.role == self.ADMIN
@@ -71,7 +73,3 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
