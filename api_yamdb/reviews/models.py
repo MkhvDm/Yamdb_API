@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-user = get_user_model()
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -85,7 +85,7 @@ class Review(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        user,
+        User,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
@@ -119,7 +119,7 @@ class Comment(models.Model):
     )
     text = models.TextField()
     author = models.ForeignKey(
-        user,
+        User,
         on_delete=models.CASCADE,
         related_name='comments'
     )
