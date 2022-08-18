@@ -44,18 +44,14 @@ class SignUpAPIView(CreateAPIView):
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            email = serializer.validated_data['email']
-            username = serializer.validated_data['username']
-            serializer.save()
-            user = get_object_or_404(User, username=username)
-            confirmation_code = default_token_generator.make_token(user)
-            self.send_confirmation_code_to_mail(email, confirmation_code)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        username = serializer.validated_data['username']
+        serializer.save()
+        user = get_object_or_404(User, username=username)
+        confirmation_code = default_token_generator.make_token(user)
+        self.send_confirmation_code_to_mail(email, confirmation_code)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TokenObtainView(TokenObtainPairView):
@@ -194,11 +190,11 @@ class SelfProfileAPIView(RetrieveUpdateAPIView):
         serializer = self.get_serializer(
             instance, data=request.data, partial=True
         )
-        if serializer.is_valid(raise_exception=True):
-            if request_role == 'user':
-                serializer.validated_data['role'] = 'user'
-                serializer.save()
-                self.perform_update(serializer)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer.is_valid(raise_exception=True)
+        if request_role == 'user':
+            serializer.validated_data['role'] = 'user'
+            serializer.save()
+            self.perform_update(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         self.perform_update(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
